@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f3f3f3;
+        }
+
+        #targetName {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #000;
+            color: #fff;
+            border-radius: 50%;
+            border: none;
+        }
+
+        #wheel {
+            margin-top: 50px;
+            width: 300px;  /* Smaller size */
+            height: 300px; /* Smaller size */
+            border-radius: 50%;
+            position: relative;
+            transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            display: inline-block; /* Centering */
+            overflow: hidden; /* Prevent text overflow */
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            clip-path: polygon(100% 0%, 0% 0%, 50% 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-origin: 100% 100%;
+            font-size: 16px; /* Adjusted font size for better visibility */
+            color: #fff;
+            font-weight: bold; /* Added bold text */
+            padding: 10px; /* Added padding to ensure text fits */
+            box-sizing: border-box; /* Include padding in width and height */
+            text-align: center; /* Center text in segments */
+        }
+
+        .segment:nth-child(1) { transform: rotate(0deg); background-color: #f94144; }
+        .segment:nth-child(2) { transform: rotate(72deg); background-color: #f3722c; }
+        .segment:nth-child(3) { transform: rotate(144deg); background-color: #f8961e; }
+        .segment:nth-child(4) { transform: rotate(216deg); background-color: #f9c74f; }
+        .segment:nth-child(5) { transform: rotate(288deg); background-color: #90be6d; }
+
+        #pointer {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid black;
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            position: relative;
+            z-index: 1; /* Ensure the result box is above other elements */
+            transform: perspective(1000px) rotateX(0deg);
+        }
+
+        #result:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            z-index: -1; /* Send the pseudo-element behind the result box */
+            filter: blur(10px);
+            transform: translateZ(-5px); /* Creates the 3D effect */
+        }
+
+        #animationText {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spin the Wheel</h1>
+    <input type="text" id="targetName" placeholder="Enter target name">
+    <button onclick="spinWheel()">Spin</button>
+
+    <div id="pointer"></div>
+    <div id="wheel">
+        <div class="segment">Magi 🍜</div>
+        <div class="segment">Playboy/girl 💃</div>
+        <div class="segment">Cheater 🤥</div>
+        <div class="segment">Innocent 😇</div>
+        <div class="segment">Genius 🤓</div>
+    </div>
+
+    <h2 id="result"></h2>
+    <div id="animationText"></div>
+
+    <script>
+        function decodeBase64(encodedString) {
+            return atob(encodedString);
+        }
+
+        function spinWheel() {
+            const targetName = document.getElementById("targetName").value.toLowerCase();
+            const resultElement = document.getElementById("result");
+            const animationText = document.getElementById("animationText");
+            const innocentGenious = ["Innocent 😇", "Genius 🤓"];
+            const magiPlayCheater = ["Magi 🍜", "Playboy/girl 💃", "Cheater 🤥"];
+            const allOptions = ["Magi 🍜", "Playboy/girl 💃", "Cheater 🤥", "Innocent 😇", "Genius 🤓"];
+
+            let resultOptions = [];
+
+            const a = "Q2hpdHJvbg==";  
+            const b = "TWFoaW4=";      
+
+            const nameOne = decodeBase64(a).toLowerCase();
+            const nameTwo = decodeBase64(b).toLowerCase();
+
+            if (targetName.includes(nameOne) || targetName.includes("citron") || targetName.includes("চিত্রণ") || targetName.includes("চিত্রন")) {
+                resultOptions = innocentGenious;
+            } else if (targetName.includes(nameTwo) || targetName.includes("মাহিন")) {
+                resultOptions = magiPlayCheater;
+            } else {
+                resultOptions = allOptions;
+            }
+
+            const randomResult = resultOptions[Math.floor(Math.random() * resultOptions.length)];
+
+            const wheel = document.getElementById("wheel");
+
+            // Reset the wheel before spinning
+            wheel.style.transition = "none"; // Disable the transition to reset the rotation
+            wheel.style.transform = `rotate(0deg)`; // Reset rotation to 0
+
+            // Use a timeout to allow the reset to take effect before spinning
+            setTimeout(() => {
+                // Spin animation with 5 seconds duration
+                wheel.style.transition = "transform 5s cubic-bezier(0.33, 1, 0.68, 1)";
+                const rotation = Math.floor(Math.random() * 360) + 1080;  // Random rotation with multiple spins
+                wheel.style.transform = `rotate(${rotation}deg)`;
+
+                // Display animation text during spin
+                animationText.innerText = "Randomly picking a result depending on his character analysis";
+                let dots = 0;
+                const maxDots = 3;
+                const interval = setInterval(() => {
+                    if (dots < maxDots) {
+                        dots++;
+                    } else {
+                        dots = 1; // Reset dots after reaching max
+                    }
+                    animationText.innerText = "Randomly picking a result depending on his character analysis" + ".".repeat(dots);
+                }, 500); // Update every 500ms
+
+                // Display result after the wheel stops spinning
+                setTimeout(() => {
+                    clearInterval(interval);
+                    resultElement.innerText = `Result: ${randomResult}`;
+                    animationText.innerText = "This is his character result"; // Final result message
+                }, 5000);
+            }, 50); // Delay before spinning to ensure reset completes
+        }
+    </script>
+</body>
+</html>
